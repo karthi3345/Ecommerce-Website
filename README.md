@@ -34,5 +34,5 @@ It allows admins to manage products, view sales analytics with bar/flow charts, 
 
 ---
 
-## 📁 Project Structure
+
 
