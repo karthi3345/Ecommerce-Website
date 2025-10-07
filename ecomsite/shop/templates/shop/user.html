@@ -1,0 +1,28 @@
+<!-- Users Table -->
+<div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow mb-6 overflow-auto">
+    <h2 class="text-xl font-bold mb-4">Users</h2>
+    <table class="min-w-full table-auto border-collapse border border-gray-200 dark:border-gray-700">
+        <thead class="bg-gray-200 dark:bg-gray-700">
+            <tr>
+                <th class="px-4 py-2 border">ID</th>
+                <th class="px-4 py-2 border">Username</th>
+                <th class="px-4 py-2 border">Email</th>
+                <th class="px-4 py-2 border">First Name</th>
+                <th class="px-4 py-2 border">Last Name</th>
+                <th class="px-4 py-2 border">Date Joined</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for user in users %}
+            <tr class="border-b hover:bg-gray-100 dark:hover:bg-gray-700">
+                <td class="border border-gray-300 px-4 py-2 text-center">{{ user.id }}</td>
+                <td class="border border-gray-300 px-4 py-2 text-center">{{ user.username }}</td>
+                <td class="border border-gray-300 px-4 py-2 text-center">{{ user.email }}</td>
+                <td class="border border-gray-300 px-4 py-2 text-center">{{ user.first_name }}</td>
+                <td class="border border-gray-300 px-4 py-2 text-center">{{ user.last_name }}</td>
+                <td class="border border-gray-300 px-4 py-2 text-center">{{ user.date_joined|date:"M d, Y" }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,248 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="transition-colors duration-300" id="htmlRoot">
+<head>
+    <meta charset="UTF-8" />
+    <title>E-Commerce Admin Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-sans">
+
+<div class="flex h-screen">
+
+    <!-- Sidebar -->
+    <div id="sidebar" class="w-64 bg-gray-800 dark:bg-gray-900 text-white flex-shrink-0 transition-all duration-300">
+        <div class="p-6 text-xl font-bold">E-Shop Admin</div>
+        <nav class="mt-6">
+            <a href="#" class="flex items-center py-2 px-6 hover:bg-gray-700 rounded transition">
+                <span class="material-icons mr-3">dashboard</span> Dashboard
+            </a>
+            <a href="#" class="flex items-center py-2 px-6 hover:bg-gray-700 rounded transition">
+                <span class="material-icons mr-3">inventory_2</span> Products
+            </a>
+            <a href="#" class="flex items-center py-2 px-6 hover:bg-gray-700 rounded transition">
+                <span class="material-icons mr-3">shopping_cart</span> Orders
+            </a>
+            <a href="#" class="flex items-center py-2 px-6 hover:bg-gray-700 rounded transition">
+                <span class="material-icons mr-3">people</span> Users
+            </a>
+            <a href="#" class="flex items-center py-2 px-6 hover:bg-gray-700 rounded transition">
+                <span class="material-icons mr-3">settings</span> Settings
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 p-6 overflow-auto">
+
+        <!-- Top Bar -->
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold">Dashboard</h1>
+            <div class="flex items-center space-x-4">
+                <!-- Dark Mode Toggle -->
+                <button id="darkModeToggle" class="bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded">🌓</button>
+
+                <!-- Notifications Dropdown -->
+                <div class="relative group">
+                    <button class="relative focus:outline-none">
+                        🔔
+                        <span class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full text-xs w-4 h-4 flex items-center justify-center">
+                            {{ notifications_count }}
+                        </span>
+                    </button>
+                    <div class="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <ul class="divide-y divide-gray-200 dark:divide-gray-700 max-h-64 overflow-y-auto">
+                            {% for note in notifications %}
+                            <li class="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                {{ note.message }}
+                            </li>
+                            {% empty %}
+                            <li class="px-4 py-2">No notifications</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+
+                <span>Admin</span>
+                <img src="{% static 'images/admin_avatar.png' %}" alt="Admin" class="w-8 h-8 rounded-full" />
+            </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div class="bg-blue-500 text-white rounded-lg p-6 shadow transform transition hover:scale-105 duration-300">
+                <div class="text-3xl font-bold">{{ products_count }}</div>
+                <div>Products</div>
+            </div>
+            <div class="bg-green-500 text-white rounded-lg p-6 shadow transform transition hover:scale-105 duration-300">
+                <div class="text-3xl font-bold">{{ orders_count }}</div>
+                <div>Orders</div>
+            </div>
+            <div class="bg-yellow-500 text-white rounded-lg p-6 shadow transform transition hover:scale-105 duration-300">
+                <div class="text-3xl font-bold">${{ total_sales }}</div>
+                <div>Total Sales</div>
+            </div>
+        </div>
+
+        <!-- Sales Chart -->
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow mb-6">
+            <h2 class="text-xl font-bold mb-4">Sales Last 7 Days</h2>
+            <canvas id="salesChart" class="w-full h-64"></canvas>
+        </div>
+
+        <!-- Products Table -->
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow mb-6 overflow-auto">
+            <h2 class="text-xl font-bold mb-4">Products</h2>
+            <table class="min-w-full table-auto border-collapse border border-gray-200 dark:border-gray-700">
+                <thead class="bg-gray-200 dark:bg-gray-700">
+                    <tr>
+                        <th class="px-4 py-2 border">ID</th>
+                        <th class="px-4 py-2 border">Title</th>
+                        <th class="px-4 py-2 border">Price</th>
+                        <th class="px-4 py-2 border">Discount</th>
+                        <th class="px-4 py-2 border">Category</th>
+                        <th class="px-4 py-2 border">Description</th>
+                        <th class="px-4 py-2 border">Product Image</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for product in products %}
+                    <tr class="border-b hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <td class="border border-gray-300 px-4 py-2 text-center">{{ product.id }}</td>
+                        <td class="border border-gray-300 px-4 py-2 text-center">{{ product.title }}</td>
+                        <td class="border border-gray-300 px-4 py-2 text-center">${{ product.price }}</td>
+                        <td class="border border-gray-300 px-4 py-2 text-center">
+                            {% if product.discount_price %}
+                                ${{ product.discount_price }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td class="border border-gray-300 px-4 py-2 text-center">{{ product.category }}</td>
+                        <td class="border border-gray-300 px-4 py-2 text-center">{{ product.description }}</td>
+                        <td class="border border-gray-300 px-4 py-2 text-center">
+                            {% if product.image %}
+                                <img src="{{ product.image }}" alt="{{ product.title }}" class="mx-auto w-16 h-16 object-cover rounded" />
+                            {% else %}
+                                <span class="text-gray-400 italic">No image</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Orders Table with Status Badges -->
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow mb-6 overflow-auto">
+            <h2 class="text-xl font-bold mb-4">Recent Orders</h2>
+            <table class="min-w-full table-auto border-collapse border border-gray-200 dark:border-gray-700">
+                <thead class="bg-gray-200 dark:bg-gray-700">
+                    <tr>
+                        <th class="px-4 py-2 border">Order ID</th>
+                        <th class="px-4 py-2 border">Customer</th>
+                        <th class="px-4 py-2 border">Total</th>
+                        <th class="px-4 py-2 border">Status</th>
+                        <th class="px-4 py-2 border">Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for order in orders %}
+                    <tr class="border-b hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <td class="border border-gray-300 px-4 py-2 text-center">{{ order.id }}</td>
+                        <td class="border border-gray-300 px-4 py-2 text-center">{{ order.customer_name }}</td>
+                        <td class="border border-gray-300 px-4 py-2 text-center">${{ order.total_price }}</td>
+                        <td class="border border-gray-300 px-4 py-2 text-center">
+                            {% if order.status == 'Pending' %}
+                                <span class="bg-yellow-200 text-yellow-800 px-2 py-1 rounded-full text-xs font-semibold">Pending</span>
+                            {% elif order.status == 'Completed' %}
+                                <span class="bg-green-200 text-green-800 px-2 py-1 rounded-full text-xs font-semibold">Completed</span>
+                            {% elif order.status == 'Cancelled' %}
+                                <span class="bg-red-200 text-red-800 px-2 py-1 rounded-full text-xs font-semibold">Cancelled</span>
+                            {% endif %}
+                        </td>
+                        <td class="border border-gray-300 px-4 py-2 text-center">{{ order.created_at_order|date:"M d, Y" }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Order Flow -->
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+            <h2 class="text-xl font-bold mb-4">Order Flow</h2>
+            <div class="flex items-center justify-between">
+                <div class="flex flex-col items-center">
+                    <div class="bg-blue-500 text-white px-4 py-2 rounded-lg">Order Placed</div>
+                    <div class="h-10 w-1 bg-gray-300 dark:bg-gray-700"></div>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="bg-yellow-500 text-white px-4 py-2 rounded-lg">Processing</div>
+                    <div class="h-10 w-1 bg-gray-300 dark:bg-gray-700"></div>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="bg-green-500 text-white px-4 py-2 rounded-lg">Shipped</div>
+                    <div class="h-10 w-1 bg-gray-300 dark:bg-gray-700"></div>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="bg-purple-500 text-white px-4 py-2 rounded-lg">Delivered</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script>
+var ctx = document.getElementById('salesChart').getContext('2d');
+var salesChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: {{ labels|safe }},
+        datasets: [{
+            label: 'Sales ($)',
+            data: {{ sales_data|safe }},
+            backgroundColor: 'rgba(59,130,246,0.2)',
+            borderColor: 'rgba(59,130,246,1)',
+            borderWidth: 2,
+            tension: 0.4,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { display: true }, tooltip: { mode: 'index', intersect: false } },
+        interaction: { mode: 'nearest', axis: 'x', intersect: false },
+        scales: { x: { grid: { color: 'rgba(0,0,0,0.05)' } }, y: { grid: { color: 'rgba(0,0,0,0.05)' } } }
+    }
+});
+</script>
+
+<!-- Dark Mode Toggle -->
+<script>
+const darkModeToggle = document.getElementById('darkModeToggle');
+const htmlRoot = document.getElementById('htmlRoot');
+
+// Load theme preference from localStorage or system
+if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    htmlRoot.classList.add('dark');
+}
+
+darkModeToggle.addEventListener('click', () => {
+    htmlRoot.classList.toggle('dark');
+    if (htmlRoot.classList.contains('dark')) {
+        localStorage.setItem('theme', 'dark');
+    } else {
+        localStorage.setItem('theme', 'light');
+    }
+});
+</script>
+
+</body>
+</html>
